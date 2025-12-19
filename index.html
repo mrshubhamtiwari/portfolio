@@ -1,0 +1,103 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Loading...</title>
+    <!-- Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@200;300;400;600;700&display=swap" rel="stylesheet">
+    <!-- Icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <!-- Styles -->
+    <link rel="stylesheet" href="style.css">
+</head>
+
+<body>
+
+    <!-- Hero -->
+    <section class="hero">
+        <div class="container hero-content">
+            <div class="profile-img-container reveal">
+                <div class="profile-img-ring"></div>
+                <img src="" alt="Profile" id="profile-img" class="profile-img">
+            </div>
+            <h1 id="hero-name" class="reveal"></h1>
+            <p id="hero-title" class="reveal"></p>
+
+            <div id="hero-tags" class="hero-tags reveal"></div>
+
+            <div class="reveal">
+                <a href="#contact" class="btn">Contact Me</a>
+                <a href="" download id="resume-btn" class="btn btn-outline"><i class="fas fa-download"></i> Resume</a>
+            </div>
+        </div>
+    </section>
+
+    <!-- About -->
+    <section id="about">
+        <div class="container">
+            <h2 class="section-title reveal"><span>About</span> Me</h2>
+            <div class="glass-card summary-card reveal">
+                <p id="about-summary" class="summary-text"></p>
+            </div>
+        </div>
+    </section>
+
+    <!-- Experience -->
+    <section id="experience">
+        <div class="container">
+            <h2 class="section-title reveal">My <span>Experience</span></h2>
+            <div id="experience-timeline" class="timeline">
+                <!-- Rendered via JS -->
+            </div>
+        </div>
+    </section>
+
+    <!-- Skills -->
+    <section id="skills">
+        <div class="container">
+            <h2 class="section-title reveal">Technical <span>Skills</span></h2>
+            <div id="skills-grid" class="skills-grid">
+                <!-- Rendered via JS -->
+            </div>
+        </div>
+    </section>
+
+    <!-- Education & Certs -->
+    <section id="education">
+        <div class="container">
+            <h2 class="section-title reveal">Education & <span>Certifications</span></h2>
+            <div id="edu-grid" class="edu-grid">
+                <!-- Rendered via JS -->
+            </div>
+        </div>
+    </section>
+
+    <!-- Footer -->
+    <footer id="contact">
+        <div class="container reveal">
+            <h2>Let's <span>Connect</span></h2>
+            <p style="color: grey; margin-top: 10px;">Open to opportunities and collaborations.</p>
+
+            <div class="social-links">
+                <a href="" id="email-btn" class="social-link" title="Email"><i class="fas fa-envelope"></i></a>
+                <a href="" id="phone-btn" class="social-link" title="Phone"><i class="fas fa-phone"></i></a>
+                <a href="" id="linkedin-btn" target="_blank" class="social-link" title="LinkedIn"><i
+                        class="fab fa-linkedin-in"></i></a>
+            </div>
+
+            <p style="opacity: 0.5; font-size: 0.8rem;">&copy; <span id="copyright-year"></span> <span
+                    id="copyright-name"></span>. All Rights Reserved.</p>
+        </div>
+    </footer>
+
+    <!-- Config Data (Source) -->
+    <script src="data/config.js"></script>
+    <!-- Render Logic -->
+    <script src="script.js"></script>
+</body>
+
+</html>

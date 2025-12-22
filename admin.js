@@ -140,6 +140,7 @@ document.addEventListener('DOMContentLoaded', () => {
 // -- Dashboard Logic Helper Functions --
 let quill;
 let jsonEditor;
+let editingId = null; // Track if we are editing a post
 
 function initDashboard() {
     loadProjects();
@@ -156,10 +157,12 @@ function initQuill() {
         theme: 'snow',
         placeholder: 'Write something amazing...',
         modules: {
+            syntax: true, // Enable syntax highlighting
             toolbar: {
                 container: [
                     [{ 'header': [1, 2, 3, false] }],
                     ['bold', 'italic', 'underline', 'strike'],
+                    ['blockquote', 'code-block'], 
                     [{ 'list': 'ordered'}, { 'list': 'bullet' }],
                     ['link', 'image', 'clean']
                 ],
@@ -170,6 +173,11 @@ function initQuill() {
         }
     });
 }
+
+
+
+
+
 
 function selectLocalImage() {
     const input = document.createElement('input');
@@ -222,7 +230,33 @@ function initJsonEditor() {
         if (doc.exists) {
             jsonEditor.set(doc.data());
         } else {
-            jsonEditor.set({ error: "No data found" });
+            // Default Template if no data exists
+            jsonEditor.set({
+                hero: { 
+                    name: "Your Name", 
+                    title: "Web Developer", 
+                    tags: ["Design", "Code"],
+                    image: "" 
+                },
+                about: { 
+                    summary: "Write your professional bio here..." 
+                },
+                experience: [ 
+                    { title: "Job Title", company: "Company Name", date: "2023 - Present", description: "Describe your role." } 
+                ],
+                skills: { 
+                    "Frontend": ["HTML", "CSS", "JavaScript"],
+                    "Backend": ["Node.js", "Firebase"] 
+                },
+                education: [
+                    { degree: "Degree Name", school: "University Name", year: "2023" }
+                ],
+                social: {
+                    email: "mailto:example@example.com",
+                    github: "https://github.com",
+                    linkedin: "https://linkedin.com"
+                }
+            });
         }
     });
 }
@@ -232,6 +266,7 @@ async function publishArticle() {
     const title = document.getElementById('post-title').value;
     const content = quill.root.innerHTML;
     const uploadStatus = document.getElementById('upload-status');
+    const publishBtn = document.getElementById('publish-btn'); // Get the button element
 
     if(!title.trim()) {
         alert("Please enter a title");
@@ -243,7 +278,7 @@ async function publishArticle() {
         return;
     }
 
-    uploadStatus.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Publishing...';
+    uploadStatus.innerHTML = '<i class="fas fa-spinner fa-spin"></i> ' + (editingId ? 'Updating...' : 'Publishing...');
 
     try {
         const tempDiv = document.createElement("div");
@@ -251,29 +286,42 @@ async function publishArticle() {
         let preview = tempDiv.textContent || tempDiv.innerText || "";
         preview = preview.substring(0, 300) + (preview.length > 300 ? "..." : "");
 
-        await db.collection('projects').add({
+        const data = {
             title: title,
             htmlContent: content,
             previewText: preview,
             type: 'article',
-            date: new Date().toISOString().split('T')[0],
-            timestamp: firebase.firestore.FieldValue.serverTimestamp()
-        });
+            // Only update date if new? Or keep original date? Let's update "updatedAt" maybe.
+            // For simplicity, we just keep formatting logic same.
+        };
 
-        uploadStatus.innerHTML = '<span style="color: #00ff00;">Article Published!</span>';
+        if(editingId) {
+            await db.collection('projects').doc(editingId).update(data);
+            uploadStatus.innerHTML = '<span style="color: #00ff00;">Article Updated!</span>';
+        } else {
+             data.date = new Date().toISOString().split('T')[0];
+             data.timestamp = firebase.firestore.FieldValue.serverTimestamp();
+            await db.collection('projects').add(data);
+            uploadStatus.innerHTML = '<span style="color: #00ff00;">Article Published!</span>';
+        }
         
+        // Reset Form
         document.getElementById('post-title').value = '';
         quill.setContents([]);
+        editingId = null;
+        publishBtn.innerHTML = '<i class="fas fa-paper-plane"></i> Publish Article'; // Reset button text
+
         setTimeout(() => uploadStatus.innerHTML = '', 3000);
         
-        // Refresh list
+        // Refresh list logic will auto-trigger via onSnapshot? Yes.
+
     } catch (e) {
         console.error(e);
         uploadStatus.innerHTML = `<span style="color: red;">Error: ${e.message}</span>`;
     }
 }
 
-// Global project loader - accessible to initDashboard
+// Global project loader
 function loadProjects() {
     const projectList = document.getElementById('project-list');
     if(!projectList) return;
@@ -295,14 +343,42 @@ function loadProjects() {
                     <div style="font-weight: 600; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;">${data.title}</div>
                     <small style="color: var(--text-muted);">${data.date}</small>
                 </div>
-                <button class="btn btn-outline" style="padding: 0.5rem; border-color: #ef4444; color: #ef4444;" onclick="deleteProject('${doc.id}', '${data.filename || ''}')">
-                    <i class="fas fa-trash"></i>
-                </button>
+                <div style="display:flex; gap: 0.5rem;">
+                    <button class="btn btn-outline" style="padding: 0.5rem; color: var(--accent-gold); border-color: var(--accent-gold);" onclick='editProject("${doc.id}", ${JSON.stringify(data).replace(/'/g, "&#39;")})'>
+                        <i class="fas fa-edit"></i>
+                    </button>
+                    <button class="btn btn-outline" style="padding: 0.5rem; border-color: #ef4444; color: #ef4444;" onclick="deleteProject('${doc.id}', '${data.filename || ''}')">
+                        <i class="fas fa-trash"></i>
+                    </button>
+                </div>
             `;
             projectList.appendChild(div);
         });
     });
 }
+
+// Edit project handler
+window.editProject = (id, data) => {
+    editingId = id;
+    document.getElementById('post-title').value = data.title;
+    
+    // Check if rich text or legacy
+    if(data.htmlContent) {
+        const delta = quill.clipboard.convert(data.htmlContent);
+        quill.setContents(delta, 'silent');
+    } else {
+        // Legacy docx
+        quill.setText(data.previewText || "Legacy content not editable.");
+    }
+    
+    // Change button text
+    const publishBtn = document.getElementById('publish-btn'); // We need to grab this again or ensure scope
+    if(publishBtn) publishBtn.innerHTML = '<i class="fas fa-save"></i> Update Article';
+    
+    // Scroll to top
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+};
+
 
 // Delete needs to be global for onclick in innerHTML
 window.deleteProject = async (docId, filename) => {

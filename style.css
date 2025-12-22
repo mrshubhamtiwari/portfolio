@@ -410,8 +410,36 @@ footer {
     transform: translateY(0);
 }
 
-/* Mobile */
+/* Mobile Responsive */
 @media (max-width: 768px) {
+    .container {
+        padding: 0 20px;
+    }
+    
+    .section-title {
+        font-size: 2rem;
+    }
+    
+    .hero-content h1 {
+        font-size: 2.5rem;
+    }
+
+    /* Hero Buttons Alignment Fix */
+    .hero .reveal {
+        display: flex;
+        flex-direction: column;
+        gap: 1rem;
+        align-items: stretch; /* Full width buttons */
+        padding: 0 2rem;
+    }
+    
+    .hero .btn, .hero .btn-outline {
+        margin: 0 !important; /* Reset specific margins */
+        width: 100%;
+        text-align: center;
+        justify-content: center;
+    }
+
     .hero h1 { font-size: 3rem; }
     .timeline::before { left: 20px; }
     .timeline-item { width: 100%; padding-left: 50px !important; padding-right: 0 !important; text-align: left !important; }

@@ -31,7 +31,8 @@
 
             <div class="reveal">
                 <a href="#contact" class="btn">Contact Me</a>
-                <a href="" download id="resume-btn" class="btn btn-outline"><i class="fas fa-download"></i> Resume</a>
+                <a href="blog.html" class="btn btn-outline"><i class="fas fa-blog"></i> Blog</a>
+                <a href="" download id="resume-btn" class="btn btn-outline" style="margin-left: 10px;"><i class="fas fa-download"></i> Resume</a>
             </div>
         </div>
     </section>
@@ -94,8 +95,15 @@
         </div>
     </footer>
 
-    <!-- Config Data (Source) -->
-    <script src="data/config.js"></script>
+    <!-- Firebase SDKs -->
+    <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-analytics-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-firestore-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-auth-compat.js"></script>
+
+    <!-- Config -->
+    <script src="firebase-config.js"></script>
+
     <!-- Render Logic -->
     <script src="script.js"></script>
 </body>

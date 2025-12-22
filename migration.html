@@ -1,0 +1,61 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Data Migration Tool</title>
+    <style>
+        body { font-family: sans-serif; background: #111; color: #fff; padding: 20px; display: flex; flex-direction: column; align-items: center; justify-content: center; min-height: 100vh; }
+        button { padding: 15px 30px; font-size: 1.2rem; background: #00E5FF; color: black; border: none; border-radius: 5px; cursor: pointer; margin-top: 20px; }
+        button:hover { background: #00b8d4; }
+        pre { background: #222; padding: 20px; border-radius: 5px; width: 100%; max-width: 600px; overflow: auto; }
+        .status { margin-top: 20px; font-weight: bold; }
+    </style>
+    
+    <!-- Firebase SDKs -->
+    <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-firestore-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-auth-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-storage-compat.js"></script>
+
+    <!-- Config -->
+    <script src="firebase-config.js"></script>
+    
+    <!-- Old Data -->
+    <script src="data/config.js"></script>
+</head>
+<body>
+    <h1>Portfolio Data Migration</h1>
+    <p>This tool will read <code>data/config.js</code> and push it to Firestore collection <code>content/main</code>.</p>
+    
+    <button onclick="migrateData()">Start Migration</button>
+    
+    <div id="status" class="status">Waiting...</div>
+
+    <script>
+        async function migrateData() {
+            const statusEl = document.getElementById('status');
+            
+            statusEl.textContent = "Migrating...";
+            
+            try {
+                const data = window.portfolioData;
+                if (!data) throw new Error("Could not read window.portfolioData from config.js");
+
+                // We want to verify we can write.
+                // In Test Mode this should work. If authenticated mode, we might need to login first.
+                // For a one-off migration, enabling Test Mode (allow write: true) is easiest.
+                
+                await db.collection('content').doc('main').set(data);
+                
+                statusEl.innerHTML = "<span style='color: #00ff00'>Success! Data migrated to Firestore.</span>";
+                console.log("Migration complete");
+                
+            } catch (error) {
+                console.error(error);
+                statusEl.innerHTML = "<span style='color: red'>Error: " + error.message + "</span><br><small>Make sure your Firestore Rules allow write (Test Mode).</small>";
+            }
+        }
+    </script>
+</body>
+</html>

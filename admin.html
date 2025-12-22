@@ -1,0 +1,249 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Portfolio Admin</title>
+    <!-- Fonts -->
+    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@200;300;400;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    
+    <!-- Reuse main styles (maybe add specific admin styles inline) -->
+    <link rel="stylesheet" href="style.css">
+    <style>
+        :root {
+            --header-height: 60px;
+            --mobile-spacing: 1rem;
+        }
+        
+        body { padding-bottom: 2rem; }
+
+        .admin-container { 
+            max-width: 1000px; 
+            margin: 2rem auto; 
+            padding: 0 var(--mobile-spacing); 
+        }
+
+        /* Mobile Optimization */
+        @media (max-width: 768px) {
+            .admin-container { margin: 1rem auto; }
+            .section-title { font-size: 1.5rem !important; }
+            
+            .dashboard-header { 
+                flex-direction: column; 
+                gap: 1rem; 
+                align-items: flex-start !important; 
+            }
+            
+            /* Scrollable Tabs */
+            .admin-nav {
+                overflow-x: auto;
+                white-space: nowrap;
+                padding-bottom: 0.5rem;
+                margin-bottom: 1.5rem;
+                /* Hide scrollbar */
+                -ms-overflow-style: none;scrollbar-width: none;
+            }
+            .admin-nav::-webkit-scrollbar { display: none; }
+            
+            .nav-tab { 
+                flex-shrink: 0; 
+                font-size: 0.95rem; 
+                padding: 0.5rem 0.8rem; 
+            }
+
+            /* Full width editor on mobile */
+            .glass-card { padding: 1.5rem !important; }
+            
+            .ql-toolbar {
+                position: sticky;
+                top: 0;
+                background: #fff;
+                z-index: 10;
+            }
+        }
+        
+        .hidden { display: none !important; }
+        
+        .login-box { text-align: center; padding: 3rem; max-width: 400px; margin: 4rem auto; }
+        .form-group { margin-bottom: 1.5rem; text-align: left; }
+        .form-group label { display: block; margin-bottom: 0.5rem; color: var(--text-muted); font-size: 0.9rem; }
+        .form-input { 
+            width: 100%; padding: 1rem; background: rgba(255,255,255,0.05); 
+            border: 1px solid var(--border-glass); border-radius: 8px; color: #fff;
+            font-size: 1rem;
+        }
+        .form-input:focus { outline: none; border-color: var(--accent-blue); }
+        
+        .dashboard-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 2rem; border-bottom: 1px solid var(--border-glass); padding-bottom: 1rem; }
+        
+        /* New Mobile Focused Styles */
+        .admin-nav { display: flex; gap: 0.5rem; margin-bottom: 2rem; border-bottom: 1px solid var(--border-glass); padding-bottom: 1rem; }
+        .nav-tab { background: transparent; border: none; color: var(--text-muted); padding: 0.5rem 1rem; cursor: pointer; font-size: 1rem; border-radius: 8px; transition: 0.3s; }
+        .nav-tab:hover { color: #fff; background: rgba(255,255,255,0.05); }
+        .nav-tab.active { color: var(--accent-blue); background: rgba(0, 229, 255, 0.1); font-weight: 600; }
+        
+        /* Quill Editor Enhancements */
+        .ql-toolbar.ql-snow {
+            background: #f3f4f6;
+            border: 1px solid var(--border-glass) !important;
+            border-radius: 12px 12px 0 0;
+            padding: 0.75rem !important;
+            position: sticky;
+            top: 0;
+            z-index: 10;
+        }
+        
+        .ql-container.ql-snow {
+            background: #ffffff;
+            border: 1px solid var(--border-glass) !important;
+            border-top: none !important;
+            border-radius: 0 0 12px 12px;
+            font-family: 'Outfit', sans-serif !important;
+            font-size: 1.1rem !important;
+            color: #1f2937; /* Dark gray for text */
+            min-height: 400px;
+        }
+        
+        .ql-editor {
+            padding: 1.5rem !important;
+            line-height: 1.8;
+            min-height: 400px;
+        }
+
+        .ql-editor.ql-blank::before {
+            color: #9ca3af !important;
+            font-style: normal !important;
+        }
+
+        /* Hover/Focus states */
+        .ql-container.ql-snow:focus-within {
+            box-shadow: 0 4px 20px rgba(0, 229, 255, 0.15);
+            border-color: var(--accent-blue) !important;
+        }
+        
+        /* Toolbar buttons */
+        .ql-snow .ql-picker-label { color: #4b5563; }
+        .ql-snow .ql-stroke { stroke: #4b5563; }
+        .ql-snow .ql-fill { fill: #4b5563; }
+        
+        .ql-snow .ql-picker-label:hover { color: var(--accent-blue) !important; }
+        .ql-snow .ql-picker-label:hover .ql-stroke { stroke: var(--accent-blue) !important; }
+
+        .project-item { 
+            display: flex; justify-content: space-between; align-items: center; 
+            padding: 1rem; background: rgba(255,255,255,0.03); border: 1px solid var(--border-glass);
+            border-radius: 8px;
+        }
+    </style>
+</head>
+<body>
+
+    <div class="admin-container">
+        
+        <!-- Login View (Phone) -->
+        <div id="login-view" class="glass-card login-box">
+             <h2 class="section-title" style="font-size: 2rem; margin-bottom: 0.5rem;">Admin <span>Login</span></h2>
+             <p style="color: var(--text-muted); margin-bottom: 2rem; font-size: 0.9rem;">Access your dashboard securely.</p>
+             
+             <form id="phone-form">
+                 <div class="form-group">
+                     <label>Mobile Number</label>
+                     <input type="tel" id="phoneNumber" class="form-input" required placeholder="9876543210">
+                 </div>
+                 <div id="recaptcha-container"></div>
+                 <button type="submit" id="get-code-btn" class="btn" style="width: 100%;">Get OTP</button>
+             </form>
+ 
+             <form id="otp-form" class="hidden">
+                 <div class="form-group">
+                     <label>Enter OTP</label>
+                     <input type="number" id="otpCode" class="form-input" required placeholder="123456">
+                 </div>
+                 <button type="submit" id="verify-btn" class="btn" style="width: 100%;">Verify & Sign In</button>
+             </form>
+ 
+             <div id="login-error" style="color: #ef4444; margin-top: 1rem;"></div>
+        </div>
+
+        <!-- Dashboard View -->
+        <div id="dashboard-view" class="hidden">
+            <div class="dashboard-header">
+                <div>
+                    <h3 style="margin: 0;">Welcome, <span style="color: var(--accent-gold);">Admin</span></h3>
+                    <small style="color: var(--text-muted);">Manage your portfolio from anywhere.</small>
+                </div>
+                <button id="logout-btn" class="btn btn-outline" style="padding: 0.5rem 1rem; font-size: 0.8rem;">Logout</button>
+            </div>
+
+            <!-- Tabs -->
+            <div class="admin-nav">
+                <button class="nav-tab active" onclick="switchTab('projects-tab')"><i class="fas fa-pen-nib"></i> Write Blog</button>
+                <button class="nav-tab" onclick="switchTab('profile-tab')"><i class="fas fa-user-cog"></i> Profile Config</button>
+            </div>
+
+            <!-- Tab: Projects -->
+            <div id="projects-tab">
+                <!-- Add New Post -->
+                <div class="glass-card" style="padding: 1.5rem; margin-bottom: 2rem;">
+                    <h4 style="font-size: 1.2rem; margin-bottom: 1.2rem; border-left: 3px solid var(--accent-blue); padding-left: 0.5rem;">Create New Post</h4>
+                    
+                    <div class="form-group">
+                        <label>Title</label>
+                        <input type="text" id="post-title" class="form-input" placeholder="What's on your mind?">
+                    </div>
+                    
+                    <div class="form-group">
+                         <label>Content</label>
+                         <div id="editor-container" class="editor-container"></div>
+                    </div>
+                    
+                    <button id="publish-btn" class="btn" style="width: 100%; padding: 1rem;">
+                        <i class="fas fa-paper-plane"></i> Publish Article
+                    </button>
+                    <div id="upload-status" style="margin-top: 1rem; text-align: center;"></div>
+                </div>
+
+                <!-- List -->
+                <h4 style="font-size: 1.2rem; margin-bottom: 1rem;">Recent Posts</h4>
+                <div id="project-list" class="project-list"></div>
+            </div>
+
+            <!-- Tab: Profile Config -->
+            <div id="profile-tab" class="hidden">
+                <div class="glass-card" style="padding: 1.5rem;">
+                    <h4 style="font-size: 1.2rem; margin-bottom: 1rem;">Edit Profile Data</h4>
+                    <div id="jsoneditor"></div>
+                    
+                    <div style="margin-top: 1rem; text-align: right;">
+                        <button id="save-config-btn" class="btn" style="width: 100%;">Save Changes</button>
+                        <div id="config-status" style="margin-top: 0.5rem; text-align: center;"></div>
+                    </div>
+                </div>
+            </div>
+
+        </div>
+
+    </div>
+
+    <!-- Firebase SDKs -->
+    <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-firestore-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-auth-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-storage-compat.js"></script>
+    
+    <!-- Mammoth (for docx preview) -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/mammoth/1.6.0/mammoth.browser.min.js"></script>
+    
+    <!-- Quill (Rich Text) -->
+    <link href="https://cdn.quilljs.com/1.3.6/quill.snow.css" rel="stylesheet">
+    <script src="https://cdn.quilljs.com/1.3.6/quill.js"></script>
+
+    <!-- JSONEditor -->
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/jsoneditor/9.10.0/jsoneditor.min.css" rel="stylesheet" type="text/css">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jsoneditor/9.10.0/jsoneditor.min.js"></script>
+
+    <script src="firebase-config.js"></script>
+    <script src="admin.js"></script>
+</body>
+</html>

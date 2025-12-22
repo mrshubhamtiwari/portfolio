@@ -1,0 +1,155 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Blog & Projects</title>
+    <!-- Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@200;300;400;600;700&display=swap" rel="stylesheet">
+    <!-- Icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <!-- Styles -->
+    <link rel="stylesheet" href="style.css">
+    
+    <!-- Firebase SDKs -->
+    <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-firestore-compat.js"></script>
+    
+    <script src="firebase-config.js"></script>
+</head>
+
+<body>
+
+    <nav style="padding: 2rem; display: flex; justify-content: space-between; align-items: center; max-width: 1200px; margin: 0 auto;">
+        <a href="index.html" class="btn btn-outline" style="border: none; padding-left: 0;"><i class="fas fa-arrow-left"></i> Back to Home</a>
+        <h2 style="font-size: 1.5rem; font-weight: 700;">My <span style="color: var(--accent-blue);">Blog</span></h2>
+    </nav>
+
+    <section>
+        <div class="container">
+            <h1 class="section-title reveal active" style="margin-bottom: 1rem;">Latest <span>Findings</span></h1>
+            
+            <div id="blog-grid" class="skills-grid">
+                <!-- Blog cards rendered here -->
+                <div style="text-align: center; width: 100%; grid-column: 1 / -1; color: var(--text-muted);">
+                    <i class="fas fa-spinner fa-spin"></i> Loading...
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Footer -->
+    <footer id="contact">
+        <div class="container reveal active">
+            <p style="opacity: 0.5; font-size: 0.8rem;">&copy; <span id="copyright-year"></span>. All Rights Reserved.</p>
+        </div>
+    </footer>
+
+    <!-- Article Modal -->
+    <div id="article-modal" style="display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.8); backdrop-filter: blur(5px); z-index: 1000; align-items: center; justify-content: center; padding: 2rem;">
+        <div class="glass-card" style="width: 100%; max-width: 800px; height: 90vh; display: flex; flex-direction: column; padding: 0; overflow: hidden; background: #0a0a0b; border: 1px solid rgba(255,255,255,0.1);">
+            
+            <div style="padding: 1.5rem; border-bottom: 1px solid rgba(255,255,255,0.1); display: flex; justify-content: space-between; align-items: start; background: rgba(255,255,255,0.02);">
+                <div>
+                     <h2 id="modal-title" style="margin: 0; font-size: 1.8rem; color: #fff;">Title</h2>
+                     <small id="modal-date" style="color: var(--accent-gold);">Date</small>
+                </div>
+                <button onclick="closeModal()" class="btn btn-outline" style="border: none; font-size: 1.5rem;"><i class="fas fa-times"></i></button>
+            </div>
+            
+            <div id="modal-content" style="padding: 2rem; overflow-y: auto; color: #d1d5db; line-height: 1.8; font-size: 1.1rem;">
+                <!-- Content goes here -->
+            </div>
+            
+        </div>
+    </div>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', async () => {
+            const grid = document.getElementById('blog-grid');
+            document.getElementById('copyright-year').textContent = new Date().getFullYear();
+            
+            try {
+                const snapshot = await db.collection('projects').orderBy('timestamp', 'desc').get();
+                
+                grid.innerHTML = '';
+                
+                if (snapshot.empty) {
+                    grid.innerHTML = '<div style="text-align: center; width: 100%; grid-column: 1 / -1; color: var(--text-muted);">No projects found. Use Admin Portal to add one.</div>';
+                    return;
+                }
+
+                snapshot.forEach(doc => {
+                    const project = doc.data();
+                    const card = createProjectCard(project);
+                    grid.appendChild(card);
+                });
+
+            } catch (error) {
+                console.error("Error loading projects:", error);
+                grid.innerHTML = '<div style="text-align: center; width: 100%; grid-column: 1 / -1; color: var(--text-muted);">Error loading projects. Check console.</div>';
+            }
+        });
+
+
+        function createProjectCard(project) {
+            const card = document.createElement('div');
+            card.className = 'glass-card exp-card reveal active';
+            card.style.cursor = 'pointer';
+            card.style.transition = 'transform 0.3s ease, border-color 0.3s ease';
+            
+            // Always open modal (even for old docx files, we just show the preview text)
+            // If it's a legacy docx without htmlContent, we might want to show a link inside the modal?
+            // For now, adhering to user request "pure blog" - we just show what we have.
+            card.onclick = () => openModal(project);
+
+            // Strip HTML for preview
+            const div = document.createElement('div');
+            div.innerHTML = project.htmlContent || project.previewText || '';
+            let val = div.textContent || div.innerText || '';
+            const preview = val.substring(0, 150) + (val.length > 150 ? '...' : '');
+
+            card.innerHTML = `
+                <div style="display: flex; justify-content: space-between; align-items: start; margin-bottom: 1rem;">
+                    <h3 style="margin: 0; color: var(--text-main); font-size: 1.25rem;">${project.title}</h3>
+                    <span style="font-size: 0.8rem; color: var(--accent-gold); border: 1px solid rgba(255, 215, 0, 0.2); padding: 2px 8px; border-radius: 12px; background: rgba(255, 215, 0, 0.05);">${project.date}</span>
+                </div>
+                
+                <div style="color: var(--text-muted); font-size: 0.95rem; line-height: 1.5; margin-bottom: 1rem; display: -webkit-box; -webkit-line-clamp: 3; -webkit-box-orient: vertical; overflow: hidden;">
+                    ${preview}
+                </div>
+
+                <div style="display: flex; justify-content: flex-end; align-items: center;">
+                    <span style="color: var(--accent-blue); font-size: 0.9rem; font-weight: 500;">Read Article <i class="fas fa-arrow-right" style="margin-left: 5px;"></i></span>
+                </div>
+            `;
+
+            return card;
+        }
+
+        function openModal(project) {
+            document.getElementById('modal-title').textContent = project.title;
+            document.getElementById('modal-date').textContent = project.date;
+            
+            // If it's old legacy docx, it might only have previewText. 
+            // In that case, we can show the previewText as the content, 
+            // or maybe a message saying "This is an archived file."
+            // But per request to "redesign as blog", we will try to show HTML content.
+            document.getElementById('modal-content').innerHTML = project.htmlContent || `<p>${project.previewText}</p><p><em>(Archived Content)</em></p>`;
+            
+            const modal = document.getElementById('article-modal');
+            modal.style.display = 'flex';
+            document.body.style.overflow = 'hidden'; 
+        }
+
+        function closeModal() {
+            document.getElementById('article-modal').style.display = 'none';
+            document.body.style.overflow = 'auto'; // allow scroll
+        }
+    </script>
+</body>
+
+</html>

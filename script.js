@@ -1,12 +1,12 @@
 // Render Logic
 document.addEventListener('DOMContentLoaded', async () => {
-    
+
     // --- Render Personal Info (Skeleton or Loading state could go here) ---
     // For now we just wait for data
-    
+
     try {
         const doc = await db.collection('content').doc('main').get();
-        
+
         if (!doc.exists) {
             console.error("No content data found in Firestore!");
             return;
@@ -29,7 +29,7 @@ document.addEventListener('DOMContentLoaded', async () => {
 
         document.getElementById('hero-title').textContent = data.personalInfo.title;
         document.getElementById('profile-img').src = data.personalInfo.image;
-        document.getElementById('resume-btn').href = data.personalInfo.resume;
+
 
         // Social Links
         document.getElementById('email-btn').href = `mailto:${data.personalInfo.email}`;
@@ -42,7 +42,7 @@ document.addEventListener('DOMContentLoaded', async () => {
 
         // --- Render Hero Tags ---
         const tagsContainer = document.getElementById('hero-tags');
-        if(tagsContainer) {
+        if (tagsContainer) {
             tagsContainer.innerHTML = ''; // clear any skeletons
             data.hero.tags.forEach(tag => {
                 const span = document.createElement('span');
@@ -57,14 +57,14 @@ document.addEventListener('DOMContentLoaded', async () => {
 
         // --- Render Experience ---
         const expContainer = document.getElementById('experience-timeline');
-        if(expContainer) {
+        if (expContainer) {
             expContainer.innerHTML = '';
             data.experience.forEach((job, index) => {
                 const item = document.createElement('div');
                 item.className = 'timeline-item reveal';
-    
+
                 const detailsHtml = job.details.map(d => `<li>${d}</li>`).join('');
-    
+
                 item.innerHTML = `
                     <div class="timeline-dot"></div>
                     <div class="glass-card exp-card">
@@ -82,14 +82,14 @@ document.addEventListener('DOMContentLoaded', async () => {
 
         // --- Render Skills ---
         const skillsContainer = document.getElementById('skills-grid');
-        if(skillsContainer) {
+        if (skillsContainer) {
             skillsContainer.innerHTML = '';
             data.skills.forEach(category => {
                 const card = document.createElement('div');
                 card.className = 'glass-card exp-card reveal';
-    
+
                 const tagsHtml = category.tags.map(tag => `<span class="skill-tag">${tag}</span>`).join('');
-    
+
                 card.innerHTML = `
                     <div class="skill-category">
                         <h3><i class="${category.icon}"></i> ${category.category}</h3>
@@ -104,25 +104,25 @@ document.addEventListener('DOMContentLoaded', async () => {
 
         // --- Render Education ---
         const eduContainer = document.getElementById('edu-grid');
-        if(eduContainer) {
+        if (eduContainer) {
             eduContainer.innerHTML = '';
             data.education.forEach(edu => {
                 const card = document.createElement('div');
                 card.className = 'glass-card exp-card reveal';
-    
+
                 let badgesHtml = '';
                 if (edu.badges && edu.badges.length > 0) {
                     badgesHtml = edu.badges.map(b => `<div class="badge">${b}</div>`).join(' ');
                 }
-    
+
                 let descHtml = '';
                 if (edu.description) {
                     descHtml = `<p style="margin-top: 1rem; font-size: 0.9rem; color: #ccc;">${edu.description}</p>`;
                 }
-    
+
                 // Add line break if badges exist
                 const splitHtml = badgesHtml ? '<br>' + badgesHtml : '';
-    
+
                 card.innerHTML = `
                     <h3>${edu.degree}</h3>
                     <div class="edu-place">${edu.institution}</div>

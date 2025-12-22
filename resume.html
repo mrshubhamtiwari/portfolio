@@ -1,0 +1,509 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Resume</title>
+    <!-- Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <!-- Icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <!-- Styles -->
+    <style>
+        /* CRITICAL OVERRIDES */
+        :root {
+            --bg: #e5e7eb;
+            --text-main: #111827;
+            --accent-blue: #0891b2;
+            --accent-gold: #b45309;
+            --gradient-primary: linear-gradient(135deg, #0891b2, #b45309);
+        }
+
+        /* RESUME STYLES */
+        body {
+            background: var(--bg) !important;
+            color: #1f2937 !important;
+            font-family: 'Inter', system-ui, -apple-system, sans-serif !important;
+            margin: 0 !important;
+            padding: 20px !important;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            font-size: 9.5pt;
+            line-height: 1.4;
+            -webkit-print-color-adjust: exact;
+            print-color-adjust: exact;
+        }
+
+        h1,
+        h2,
+        h3,
+        h4,
+        h5,
+        p,
+        ul,
+        li {
+            margin: 0;
+            padding: 0;
+            color: #111827;
+        }
+
+        a {
+            text-decoration: none;
+            color: inherit;
+        }
+
+        /* Actions */
+        .action-bar {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            display: flex;
+            gap: 8px;
+            z-index: 9999;
+        }
+
+        .btn-download {
+            background: #2563eb;
+            color: white;
+            padding: 8px 16px;
+            border-radius: 6px;
+            font-weight: 500;
+            display: flex;
+            align-items: center;
+            gap: 5px;
+            border: none;
+            cursor: pointer;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+            font-size: 0.9rem;
+            transition: background 0.2s;
+        }
+
+        .btn-download:hover {
+            background: #1d4ed8;
+        }
+
+        /* Page Container */
+        .resume-container {
+            width: 100%;
+            max-width: 210mm;
+            background: white !important;
+            padding: 30px 45px;
+            box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+            min-height: 297mm;
+            box-sizing: border-box;
+            margin: 0 auto;
+            position: relative;
+        }
+
+        /* Modern Executive Header */
+        .resume-header {
+            margin-bottom: 10px;
+            padding-bottom: 15px;
+            border-bottom: 1px solid #e5e7eb;
+            /* Subtle separator */
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-start;
+        }
+
+        .header-left {
+            flex: 1;
+        }
+
+        .header-content h1 {
+            font-size: 32pt;
+            font-weight: 800;
+            letter-spacing: -0.8px;
+            line-height: 1;
+            margin-bottom: 6px;
+            color: #111;
+        }
+
+        .header-content h2 {
+            font-size: 11pt;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            margin-top: 5px;
+            background: var(--gradient-primary);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            color: var(--accent-blue);
+        }
+
+        /* PDF Generation Overrides */
+        /* PDF Generation Overrides */
+        .pdf-mode .header-content h2 {
+            background: none !important;
+            -webkit-text-fill-color: initial !important;
+            color: var(--accent-blue) !important;
+        }
+
+        .pdf-mode.resume-container {
+            box-shadow: none !important;
+            margin: 0 !important;
+            min-height: 0 !important;
+            height: auto !important;
+            overflow: visible !important;
+        }
+
+        /* External Toolbar */
+        .resume-toolbar {
+            width: 100%;
+            max-width: 210mm;
+            margin: 0 auto 20px auto;
+            display: flex;
+            justify-content: flex-end;
+            z-index: 1000;
+        }
+
+        .toolbar-btn {
+            background: var(--gradient-primary);
+            color: white;
+            padding: 8px 16px;
+            border-radius: 6px;
+            font-weight: 500;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            border: none;
+            cursor: pointer;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+            font-size: 0.9rem;
+            transition: all 0.2s;
+            font-family: 'Inter', sans-serif;
+        }
+
+        .toolbar-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 8px rgba(0, 0, 0, 0.15);
+        }
+
+        .contact-item {
+            display: flex;
+            align-items: center;
+            justify-content: flex-end;
+            gap: 8px;
+            font-size: 9.5pt;
+            color: #4b5563;
+        }
+
+        .contact-item i {
+            color: #9ca3af;
+            font-size: 0.9em;
+            width: 14px;
+            text-align: center;
+        }
+
+        .contact-item a {
+            transition: color 0.15s;
+        }
+
+        .contact-item a:hover {
+            color: var(--accent-blue);
+            text-decoration: underline;
+        }
+
+        /* Sections */
+        .resume-section {
+            margin-bottom: 20px;
+            /* Distinct styling */
+        }
+
+        .section-title {
+            font-size: 11pt;
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            border-bottom: 2px solid #111;
+            /* Strong anchor */
+            padding-bottom: 4px;
+            margin-bottom: 15px;
+            color: #111;
+        }
+
+        /* Experience */
+        .exp-item {
+            margin-bottom: 16px;
+        }
+
+        .exp-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: baseline;
+            margin-bottom: 4px;
+        }
+
+        .exp-role-company {
+            font-size: 11pt;
+        }
+
+        .exp-role {
+            font-weight: 700;
+            color: #000;
+            font-size: 11.5pt;
+            /* Slightly larger */
+            background: rgba(0, 0, 0, 0.03);
+            /* Subtle backdrop */
+            padding: 2px 6px;
+            border-radius: 4px;
+            display: inline-block;
+        }
+
+        .badge-gold {
+            display: inline-flex;
+            align-items: center;
+            gap: 4px;
+            background: #fffbeb;
+            color: #b45309;
+            border: 1px solid #fcd34d;
+            padding: 2px 6px;
+            border-radius: 12px;
+            font-size: 0.75rem;
+            font-weight: 600;
+            margin-left: 8px;
+            vertical-align: middle;
+        }
+
+        .exp-company {
+            font-weight: 500;
+            color: #374151;
+            margin-left: 4px;
+        }
+
+        .exp-company::before {
+            content: "•";
+            margin-right: 6px;
+            color: #9ca3af;
+        }
+
+        .exp-date {
+            font-size: 9.5pt;
+            color: #4b5563;
+            font-weight: 500;
+            font-feature-settings: "tnum";
+        }
+
+        .exp-details {
+            list-style: none;
+            /* Cleaner look */
+            margin-left: 0;
+            font-size: 10pt;
+            color: #374151;
+            line-height: 1.5;
+        }
+
+        .exp-details li {
+            margin-bottom: 3px;
+            padding-left: 12px;
+            position: relative;
+        }
+
+        .exp-details li::before {
+            content: "•";
+            position: absolute;
+            left: 0;
+            color: #9ca3af;
+        }
+
+        /* Skills */
+        .skills-section-grid {
+            display: grid;
+            grid-template-columns: 1fr;
+            gap: 6px;
+        }
+
+        .skill-category {
+            display: flex;
+            font-size: 10pt;
+            align-items: baseline;
+        }
+
+        .skill-label {
+            width: 140px;
+            font-weight: 700;
+            color: #111;
+            flex-shrink: 0;
+        }
+
+        .skill-list-inline {
+            color: #374151;
+        }
+
+        /* Education */
+        .edu-item {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 6px;
+            font-size: 10pt;
+        }
+
+        .edu-degree {
+            font-weight: 600;
+            color: #000;
+        }
+
+        .edu-school {
+            color: #374151;
+        }
+
+
+
+        @media print {
+            @page {
+                margin: 0;
+            }
+
+            body {
+                padding: 0 !important;
+                background: white !important;
+                margin: 0 !important;
+            }
+
+            .action-bar,
+            .print-badge {
+                display: none !important;
+            }
+
+            .resume-container {
+                box-shadow: none;
+                margin: 0;
+                padding: 40px 50px;
+                /* Internal padding is ok, but page margin is 0 */
+                width: 100%;
+                max-width: 100%;
+                border: none;
+            }
+
+            .section-title {
+                border-bottom-color: #000 !important;
+            }
+        }
+    </style>
+</head>
+
+<body>
+
+    <!-- External Toolbar -->
+    <div class="resume-toolbar" data-html2canvas-ignore="true">
+        <button onclick="downloadPDF()" class="toolbar-btn">
+            <i class="fas fa-file-pdf"></i> Download PDF
+        </button>
+    </div>
+
+    <div class="resume-container" id="resume-content">
+        <!-- New Modern Header -->
+        <header class="resume-header">
+            <div class="header-left header-content">
+                <h1 style="display: flex; align-items: center; gap: 2px;">
+                    <span id="res-name">Loading...</span>
+                </h1>
+                <h2 id="res-title"></h2>
+            </div>
+            <div class="header-right">
+                <div class="contact-item">
+                    <a href="" id="res-email"><span id="txt-email"></span></a>
+                    <i class="fas fa-envelope"></i>
+                </div>
+                <div class="contact-item">
+                    <a href="" id="res-phone"><span id="txt-phone"></span></a>
+                    <i class="fas fa-phone"></i>
+                </div>
+                <!-- Restored GitHub to prevent JS Error -->
+                <div class="contact-item" id="github-container">
+                    <a href="" id="res-github" target="_blank">GitHub</a>
+                    <i class="fab fa-github"></i>
+                </div>
+                <div class="contact-item">
+                    <a href="" id="res-linkedin" target="_blank">LinkedIn</a>
+                    <i class="fab fa-linkedin"></i>
+                </div>
+                <div class="contact-item" id="res-web-container">
+                    <a href="" id="res-web" target="_blank">Portfolio</a>
+                    <i class="fas fa-globe"></i>
+                </div>
+            </div>
+        </header>
+
+        <!-- Summary -->
+        <section class="resume-section">
+            <h3 class="section-title">Professional Summary</h3>
+            <div id="res-summary" class="summary-text"></div>
+        </section>
+
+        <!-- Experience -->
+        <section class="resume-section">
+            <h3 class="section-title">Work Experience</h3>
+            <div id="res-experience"></div>
+        </section>
+
+        <!-- Education -->
+        <section class="resume-section">
+            <h3 class="section-title">Education</h3>
+            <div id="res-education"></div>
+        </section>
+
+        <!-- Skills -->
+        <section class="resume-section">
+            <h3 class="section-title">Technical Skills</h3>
+            <div id="res-skills" class="skills-section-grid"></div>
+        </section>
+
+
+    </div>
+
+    <!-- Firebase SDKs -->
+    <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-firestore-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-auth-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-storage-compat.js"></script>
+
+    <!-- Config -->
+    <script src="firebase-config.js"></script>
+
+    <!-- Logic -->
+    <script src="resume.js"></script>
+    <!-- PDF Generation -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
+    <script>
+        function downloadPDF() {
+            const element = document.getElementById('resume-content');
+            const button = document.querySelector('.toolbar-btn');
+
+            // Add PDF mode class to fix gradient text and margin issues
+            element.classList.add('pdf-mode');
+
+            const opt = {
+                margin: 0,
+                filename: 'Resume.pdf',
+                image: { type: 'jpeg', quality: 0.98 },
+                html2canvas: { scale: 2, useCORS: true, letterRendering: true, scrollY: 0 },
+                jsPDF: { unit: 'mm', format: 'a4', orientation: 'portrait' }
+            };
+
+            // Show loading state
+            const originalText = button.innerHTML;
+            button.innerHTML = '<i class="fas fa-spinner fa-spin"></i>';
+            button.style.pointerEvents = 'none';
+
+            html2pdf().set(opt).from(element).save().then(() => {
+                button.innerHTML = originalText;
+                button.style.pointerEvents = 'auto';
+                element.classList.remove('pdf-mode');
+            }).catch(err => {
+                console.error(err);
+                alert('Error generating PDF');
+                button.innerHTML = originalText;
+                button.style.pointerEvents = 'auto';
+                element.classList.remove('pdf-mode');
+            });
+        }
+    </script>
+</body>
+
+</html>

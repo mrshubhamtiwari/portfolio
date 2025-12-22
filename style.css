@@ -20,7 +20,7 @@
 body {
     font-family: 'Outfit', sans-serif;
     background-color: var(--bg-dark);
-    background-image: 
+    background-image:
         radial-gradient(circle at 10% 20%, rgba(0, 229, 255, 0.08) 0%, transparent 40%),
         radial-gradient(circle at 90% 80%, rgba(255, 215, 0, 0.05) 0%, transparent 40%);
     color: var(--text-main);
@@ -32,9 +32,11 @@ body {
 ::-webkit-scrollbar {
     width: 8px;
 }
+
 ::-webkit-scrollbar-track {
     background: var(--bg-dark);
 }
+
 ::-webkit-scrollbar-thumb {
     background: rgba(255, 255, 255, 0.2);
     border-radius: 4px;
@@ -66,7 +68,8 @@ body {
     background: linear-gradient(135deg, var(--accent-blue), var(--accent-gold));
     -webkit-background-clip: text;
     -webkit-text-fill-color: transparent;
-    background-clip: text; /* Compatibility fix */
+    background-clip: text;
+    /* Compatibility fix */
 }
 
 .section-title {
@@ -74,7 +77,8 @@ body {
     font-weight: 700;
     margin-bottom: 3rem;
     text-align: center;
-    opacity: 0; /* Animated later */
+    opacity: 0;
+    /* Animated later */
     transform: translateY(20px);
     transition: all 0.8s ease;
 }
@@ -130,7 +134,7 @@ section {
     object-fit: cover;
     object-position: center 20%;
     border-radius: 50%;
-    border: 3px solid rgba(0,0,0,0.5);
+    border: 3px solid rgba(0, 0, 0, 0.5);
     position: relative;
     z-index: 2;
 }
@@ -192,7 +196,7 @@ section {
 
 .btn-outline:hover {
     border-color: var(--text-main);
-    background: rgba(255,255,255,0.05);
+    background: rgba(255, 255, 255, 0.05);
     box-shadow: none;
 }
 
@@ -209,7 +213,7 @@ section {
 /* Experience */
 .timeline {
     position: relative;
-    max-width: 900px;
+    max-width: 1100px;
     margin: 0 auto;
 }
 
@@ -220,7 +224,7 @@ section {
     top: 0;
     bottom: 0;
     width: 2px;
-    background: rgba(255,255,255,0.1);
+    background: rgba(255, 255, 255, 0.1);
     transform: translateX(-50%);
 }
 
@@ -232,13 +236,13 @@ section {
 
 .timeline-item:nth-child(odd) {
     left: 0;
-    padding-right: 3rem;
+    padding-right: 2rem;
     text-align: right;
 }
 
 .timeline-item:nth-child(even) {
     left: 50%;
-    padding-left: 3rem;
+    padding-left: 2rem;
 }
 
 .timeline-dot {
@@ -282,7 +286,7 @@ section {
     color: var(--text-muted);
     margin-bottom: 1rem;
     display: inline-block;
-    background: rgba(255,255,255,0.05);
+    background: rgba(255, 255, 255, 0.05);
     padding: 0.2rem 0.8rem;
     border-radius: 20px;
 }
@@ -318,8 +322,8 @@ section {
 }
 
 .skill-tag {
-    background: rgba(255,255,255,0.03);
-    border: 1px solid rgba(255,255,255,0.1);
+    background: rgba(255, 255, 255, 0.03);
+    border: 1px solid rgba(255, 255, 255, 0.1);
     padding: 0.5rem 1rem;
     border-radius: 8px;
     font-size: 0.9rem;
@@ -396,7 +400,9 @@ footer {
 
 /* Animations */
 @keyframes spin {
-    to { transform: rotate(360deg); }
+    to {
+        transform: rotate(360deg);
+    }
 }
 
 .reveal {
@@ -415,11 +421,11 @@ footer {
     .container {
         padding: 0 20px;
     }
-    
+
     .section-title {
         font-size: 2rem;
     }
-    
+
     .hero-content h1 {
         font-size: 2.5rem;
     }
@@ -429,20 +435,40 @@ footer {
         display: flex;
         flex-direction: column;
         gap: 1rem;
-        align-items: stretch; /* Full width buttons */
+        align-items: stretch;
+        /* Full width buttons */
         padding: 0 2rem;
     }
-    
-    .hero .btn, .hero .btn-outline {
-        margin: 0 !important; /* Reset specific margins */
+
+    .hero .btn,
+    .hero .btn-outline {
+        margin: 0 !important;
+        /* Reset specific margins */
         width: 100%;
         text-align: center;
         justify-content: center;
     }
 
-    .hero h1 { font-size: 3rem; }
-    .timeline::before { left: 20px; }
-    .timeline-item { width: 100%; padding-left: 50px !important; padding-right: 0 !important; text-align: left !important; }
-    .timeline-item:nth-child(even) { left: 0; }
-    .timeline-dot { left: 10px !important; }
+    .hero h1 {
+        font-size: 3rem;
+    }
+
+    .timeline::before {
+        left: 20px;
+    }
+
+    .timeline-item {
+        width: 100%;
+        padding-left: 50px !important;
+        padding-right: 0 !important;
+        text-align: left !important;
+    }
+
+    .timeline-item:nth-child(even) {
+        left: 0;
+    }
+
+    .timeline-dot {
+        left: 10px !important;
+    }
 }

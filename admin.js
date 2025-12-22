@@ -4,7 +4,7 @@ document.addEventListener('DOMContentLoaded', () => {
     const errorEl = document.getElementById('login-error');
     if (typeof firebase === 'undefined' || typeof auth === 'undefined') {
         console.error("Firebase/Auth not loaded.");
-        if(errorEl) errorEl.innerHTML = `
+        if (errorEl) errorEl.innerHTML = `
             <div style="background: rgba(255,0,0,0.1); padding: 1rem; border-radius: 8px; border: 1px solid red; color: red;">
                 <strong>System Error:</strong> Firebase SDK could not be loaded.<br>
                 1. Check your internet connection.<br>
@@ -23,7 +23,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
     // -- 1. Recaptcha Init --
     try {
-        if(!window.recaptchaVerifier) {
+        if (!window.recaptchaVerifier) {
             window.recaptchaVerifier = new firebase.auth.RecaptchaVerifier('recaptcha-container', {
                 'size': 'invisible'
             });
@@ -54,13 +54,13 @@ document.addEventListener('DOMContentLoaded', () => {
         if (!phoneNumber.startsWith('+')) {
             phoneNumber = '+91' + phoneNumber;
         }
-        
+
         errorEl.textContent = "Sending OTP to " + phoneNumber + "...";
-        
+
         if (!window.recaptchaVerifier) {
-             errorEl.textContent = "Recaptcha not ready. Refreshing...";
-             location.reload();
-             return;
+            errorEl.textContent = "Recaptcha not ready. Refreshing...";
+            location.reload();
+            return;
         }
 
         auth.signInWithPhoneNumber(phoneNumber, window.recaptchaVerifier)
@@ -72,7 +72,7 @@ document.addEventListener('DOMContentLoaded', () => {
             }).catch((error) => {
                 errorEl.textContent = error.message;
                 console.error(error);
-                if(window.recaptchaVerifier) {
+                if (window.recaptchaVerifier) {
                     window.recaptchaVerifier.render().then(widgetId => grecaptcha.reset(widgetId));
                 }
             });
@@ -82,9 +82,9 @@ document.addEventListener('DOMContentLoaded', () => {
     otpForm.addEventListener('submit', (e) => {
         e.preventDefault();
         const code = document.getElementById('otpCode').value;
-        const errorEl = document.getElementById('login-error'); 
-        
-        if(!window.confirmationResult) return;
+        const errorEl = document.getElementById('login-error');
+
+        if (!window.confirmationResult) return;
 
         window.confirmationResult.confirm(code).then((result) => {
             errorEl.textContent = "";
@@ -105,7 +105,7 @@ document.addEventListener('DOMContentLoaded', () => {
     // We attach these once. safely.
     document.body.addEventListener('click', async (e) => {
         // Save Config
-        if(e.target && e.target.id == 'save-config-btn') {
+        if (e.target && e.target.id == 'save-config-btn') {
             const btn = e.target;
             const status = document.getElementById('config-status');
             const data = jsonEditor.get();
@@ -122,16 +122,16 @@ document.addEventListener('DOMContentLoaded', () => {
             }
             btn.disabled = false;
         }
-        
+
         // Publish Button (or inside button)
-        if(e.target && (e.target.id == 'publish-btn' || e.target.closest('#publish-btn'))) {
-             publishArticle();
+        if (e.target && (e.target.id == 'publish-btn' || e.target.closest('#publish-btn'))) {
+            publishArticle();
         }
     });
 
     // Project List Init
     const projectList = document.getElementById('project-list');
-    if(projectList) {
+    if (projectList) {
         // defined below
     }
 });
@@ -149,9 +149,9 @@ function initDashboard() {
 }
 
 function initQuill() {
-    if(quill) return;
+    if (quill) return;
     const editorEl = document.getElementById('editor-container');
-    if(!editorEl) return;
+    if (!editorEl) return;
 
     quill = new Quill('#editor-container', {
         theme: 'snow',
@@ -162,8 +162,8 @@ function initQuill() {
                 container: [
                     [{ 'header': [1, 2, 3, false] }],
                     ['bold', 'italic', 'underline', 'strike'],
-                    ['blockquote', 'code-block'], 
-                    [{ 'list': 'ordered'}, { 'list': 'bullet' }],
+                    ['blockquote', 'code-block'],
+                    [{ 'list': 'ordered' }, { 'list': 'bullet' }],
                     ['link', 'image', 'clean']
                 ],
                 handlers: {
@@ -198,12 +198,12 @@ function selectLocalImage() {
 function saveToServer(file) {
     const uploadStatus = document.getElementById('upload-status');
     const range = quill.getSelection();
-    
+
     uploadStatus.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Uploading Image...';
 
     const storageRef = storage.ref();
     const fileRef = storageRef.child(`blog-images/${Date.now()}_${file.name}`);
-    
+
     fileRef.put(file).then(async (snapshot) => {
         const url = await snapshot.ref.getDownloadURL();
         quill.insertEmbed(range.index, 'image', url);
@@ -215,38 +215,45 @@ function saveToServer(file) {
 }
 
 function initJsonEditor() {
-    if(jsonEditor) return;
+    if (jsonEditor) return;
     const container = document.getElementById("jsoneditor");
-    if(!container) return;
+    if (!container) return;
 
     const options = {
         mode: 'tree',
-        modes: ['code', 'tree'], 
+        modes: ['code', 'tree'],
     };
     jsonEditor = new JSONEditor(container, options);
 
     // Fetch initial data
     db.collection('content').doc('main').get().then((doc) => {
         if (doc.exists) {
-            jsonEditor.set(doc.data());
+            let data = doc.data();
+            // Ensure references exists for legacy data
+            if (!data.references) {
+                data.references = [
+                    { name: "Reference Name", role: "Manager", company: "Company", contact: "email@example.com" }
+                ];
+            }
+            jsonEditor.set(data);
         } else {
             // Default Template if no data exists
             jsonEditor.set({
-                hero: { 
-                    name: "Your Name", 
-                    title: "Web Developer", 
+                hero: {
+                    name: "Your Name",
+                    title: "Web Developer",
                     tags: ["Design", "Code"],
-                    image: "" 
+                    image: ""
                 },
-                about: { 
-                    summary: "Write your professional bio here..." 
+                about: {
+                    summary: "Write your professional bio here..."
                 },
-                experience: [ 
-                    { title: "Job Title", company: "Company Name", date: "2023 - Present", description: "Describe your role." } 
+                experience: [
+                    { title: "Job Title", company: "Company Name", date: "2023 - Present", description: "Describe your role." }
                 ],
-                skills: { 
+                skills: {
                     "Frontend": ["HTML", "CSS", "JavaScript"],
-                    "Backend": ["Node.js", "Firebase"] 
+                    "Backend": ["Node.js", "Firebase"]
                 },
                 education: [
                     { degree: "Degree Name", school: "University Name", year: "2023" }
@@ -255,7 +262,10 @@ function initJsonEditor() {
                     email: "mailto:example@example.com",
                     github: "https://github.com",
                     linkedin: "https://linkedin.com"
-                }
+                },
+                references: [
+                    { name: "Reference Name", role: "Manager", company: "Company", contact: "email@example.com" }
+                ]
             });
         }
     });
@@ -268,12 +278,12 @@ async function publishArticle() {
     const uploadStatus = document.getElementById('upload-status');
     const publishBtn = document.getElementById('publish-btn'); // Get the button element
 
-    if(!title.trim()) {
+    if (!title.trim()) {
         alert("Please enter a title");
         return;
     }
 
-    if(content === '<p><br></p>') {
+    if (content === '<p><br></p>') {
         alert("Please write some content");
         return;
     }
@@ -295,16 +305,16 @@ async function publishArticle() {
             // For simplicity, we just keep formatting logic same.
         };
 
-        if(editingId) {
+        if (editingId) {
             await db.collection('projects').doc(editingId).update(data);
             uploadStatus.innerHTML = '<span style="color: #00ff00;">Article Updated!</span>';
         } else {
-             data.date = new Date().toISOString().split('T')[0];
-             data.timestamp = firebase.firestore.FieldValue.serverTimestamp();
+            data.date = new Date().toISOString().split('T')[0];
+            data.timestamp = firebase.firestore.FieldValue.serverTimestamp();
             await db.collection('projects').add(data);
             uploadStatus.innerHTML = '<span style="color: #00ff00;">Article Published!</span>';
         }
-        
+
         // Reset Form
         document.getElementById('post-title').value = '';
         quill.setContents([]);
@@ -312,7 +322,7 @@ async function publishArticle() {
         publishBtn.innerHTML = '<i class="fas fa-paper-plane"></i> Publish Article'; // Reset button text
 
         setTimeout(() => uploadStatus.innerHTML = '', 3000);
-        
+
         // Refresh list logic will auto-trigger via onSnapshot? Yes.
 
     } catch (e) {
@@ -324,11 +334,11 @@ async function publishArticle() {
 // Global project loader
 function loadProjects() {
     const projectList = document.getElementById('project-list');
-    if(!projectList) return;
+    if (!projectList) return;
 
     db.collection('projects').orderBy('timestamp', 'desc').onSnapshot(snapshot => {
         projectList.innerHTML = '';
-        if(snapshot.empty) {
+        if (snapshot.empty) {
             projectList.innerHTML = '<div style="color: var(--text-muted); text-align: center;">No posts yet. Write one!</div>';
             return;
         }
@@ -337,7 +347,7 @@ function loadProjects() {
             const data = doc.data();
             const div = document.createElement('div');
             div.className = 'project-item';
-            
+
             div.innerHTML = `
                 <div style="flex: 1; overflow: hidden; margin-right: 1rem;">
                     <div style="font-weight: 600; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;">${data.title}</div>
@@ -361,20 +371,20 @@ function loadProjects() {
 window.editProject = (id, data) => {
     editingId = id;
     document.getElementById('post-title').value = data.title;
-    
+
     // Check if rich text or legacy
-    if(data.htmlContent) {
+    if (data.htmlContent) {
         const delta = quill.clipboard.convert(data.htmlContent);
         quill.setContents(delta, 'silent');
     } else {
         // Legacy docx
         quill.setText(data.previewText || "Legacy content not editable.");
     }
-    
+
     // Change button text
     const publishBtn = document.getElementById('publish-btn'); // We need to grab this again or ensure scope
-    if(publishBtn) publishBtn.innerHTML = '<i class="fas fa-save"></i> Update Article';
-    
+    if (publishBtn) publishBtn.innerHTML = '<i class="fas fa-save"></i> Update Article';
+
     // Scroll to top
     window.scrollTo({ top: 0, behavior: 'smooth' });
 };
@@ -382,11 +392,11 @@ window.editProject = (id, data) => {
 
 // Delete needs to be global for onclick in innerHTML
 window.deleteProject = async (docId, filename) => {
-    if(!confirm('Delete this post?')) return;
+    if (!confirm('Delete this post?')) return;
     try {
-        if(filename) await storage.ref(`projects/${filename}`).delete().catch(e => console.warn("File not found or already deleted"));
+        if (filename) await storage.ref(`projects/${filename}`).delete().catch(e => console.warn("File not found or already deleted"));
         await db.collection('projects').doc(docId).delete();
-    } catch(err) {
+    } catch (err) {
         alert("Error: " + err.message);
     }
 };
@@ -397,8 +407,8 @@ window.switchTab = (tabId) => {
     document.querySelectorAll('.nav-tab').forEach(b => b.classList.remove('active'));
 
     document.getElementById(tabId).classList.remove('hidden');
-    
+
     const tabs = { 'projects-tab': 0, 'profile-tab': 1 };
     const tabEls = document.querySelectorAll('.nav-tab');
-    if(tabEls[tabs[tabId]]) tabEls[tabs[tabId]].classList.add('active');
+    if (tabEls[tabs[tabId]]) tabEls[tabs[tabId]].classList.add('active');
 };

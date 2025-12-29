@@ -88,6 +88,40 @@
             padding: 2rem !important; 
         }
         
+        .ql-editor pre {
+            padding: 1rem !important;
+            overflow-x: auto !important;
+            margin-bottom: 1rem !important;
+        }
+
+        /* MOBILE OPTIMIZATIONS */
+        @media (max-width: 768px) {
+            #article-modal {
+                padding: 0 !important;
+                background: #000; /* Full black bg for mobile focus */
+                align-items: flex-end; /* Sheet style or just full cover */
+            }
+
+            #modal-card {
+                width: 100% !important;
+                height: 100% !important;
+                max-width: 100% !important;
+                border-radius: 0 !important; /* Full screen, no corners */
+                border: none !important;
+            }
+
+            /* Assuming modal-content refers to the content area within the modal-card */
+            /* If it's not a direct element, this style might need adjustment */
+            #modal-card > div:last-child { /* Target the quill-viewer-wrapper or similar content container */
+                padding: 1rem !important;
+            }
+            
+            .ql-editor {
+                padding: 1rem !important;
+                font-size: 1rem !important; /* Slightly smaller text for mobile */
+            }
+        }
+        
         /* Typography overrides to match site font weight preferences if needed */
         .ql-editor h1, .ql-editor h2, .ql-editor h3 {
             font-weight: 700 !important;

@@ -384,6 +384,54 @@
                 border-bottom-color: #000 !important;
             }
         }
+        
+        /* MOBILE VIEWPORT FIXES (SCREEN ONLY) */
+        @media screen and (max-width: 768px) {
+            .resume-container {
+                padding: 20px !important;
+                width: 100% !important;
+                box-sizing: border-box !important;
+            }
+            
+            .resume-header {
+                flex-direction: column;
+                align-items: flex-start; /* Left align looks cleaner than center for resume */
+                gap: 15px;
+            }
+            
+            .header-right {
+                width: 100%;
+                display: flex;
+                flex-direction: row;        /* Changed from column to row */
+                flex-wrap: wrap;            /* Allow wrapping */
+                align-items: center;        /* Center vertically */
+                gap: 12px;                  /* Horizontal spacing between items */
+                margin-top: 5px;            /* Slight separation from name */
+            }
+            
+            .contact-item {
+                justify-content: flex-start;
+                width: auto;                /* Let items take natural width */
+                flex-direction: row; 
+                display: inline-flex;       /* inline behavior */
+                font-size: 0.85rem;         /* Slightly compact font */
+            }
+            
+            /* Visual separator for row items if needed, or just gap */
+            /* Not adding borders to keep it clean */
+            
+            /* Actually, ease of reading: Icon Left, Text Right */
+            .contact-item {
+                flex-direction: row; 
+                justify-content: flex-start;
+            }
+            .contact-item i {
+                order: -1; /* Move icon to start */
+                margin-right: 8px;
+                text-align: center;
+                width: 20px;
+            }
+        }
     </style>
 </head>
 

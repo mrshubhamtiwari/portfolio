@@ -148,10 +148,14 @@ function initDashboard() {
     initJsonEditor();
 }
 
+
+
 function initQuill() {
     if (quill) return;
     const editorEl = document.getElementById('editor-container');
     if (!editorEl) return;
+
+
 
     quill = new Quill('#editor-container', {
         theme: 'snow',
@@ -160,11 +164,22 @@ function initQuill() {
             syntax: true, // Enable syntax highlighting
             toolbar: {
                 container: [
-                    [{ 'header': [1, 2, 3, false] }],
-                    ['bold', 'italic', 'underline', 'strike'],
+                    [{ 'font': [] }],
+                    [{ 'size': ['small', false, 'large', 'huge'] }],  // custom dropdown
+                    ['bold', 'italic', 'underline', 'strike'],        // toggled buttons
                     ['blockquote', 'code-block'],
-                    [{ 'list': 'ordered' }, { 'list': 'bullet' }],
-                    ['link', 'image', 'clean']
+
+                    [{ 'header': 1 }, { 'header': 2 }],               // custom button values
+                    [{ 'list': 'ordered'}, { 'list': 'bullet' }],
+                    [{ 'script': 'sub'}, { 'script': 'super' }],      // superscript/subscript
+                    [{ 'indent': '-1'}, { 'indent': '+1' }],          // outdent/indent
+                    [{ 'direction': 'rtl' }],                         // text direction
+
+                    [{ 'color': [] }, { 'background': [] }],          // dropdown with defaults from theme
+                    [{ 'align': [] }],
+
+                    ['clean'],                                         // remove formatting button
+                    ['link', 'image', 'video']
                 ],
                 handlers: {
                     'image': selectLocalImage
@@ -172,7 +187,20 @@ function initQuill() {
             }
         }
     });
+    
+    // Tooltip for custom button
+    setTimeout(() => {
+        const dividerBtn = document.querySelector('.ql-divider');
+        if (dividerBtn) dividerBtn.title = "Restart List Numbering (Split List)";
+    }, 100);
+
+    // Tooltip for custom button
+    setTimeout(() => {
+        const dividerBtn = document.querySelector('.ql-divider');
+        if (dividerBtn) dividerBtn.title = "Restart List Numbering (Split List)";
+    }, 100);
 }
+
 
 
 
@@ -338,6 +366,8 @@ function loadProjects() {
 
     db.collection('projects').orderBy('timestamp', 'desc').onSnapshot(snapshot => {
         projectList.innerHTML = '';
+        window.projectsMap = {}; // Reset map
+
         if (snapshot.empty) {
             projectList.innerHTML = '<div style="color: var(--text-muted); text-align: center;">No posts yet. Write one!</div>';
             return;
@@ -345,6 +375,8 @@ function loadProjects() {
 
         snapshot.forEach(doc => {
             const data = doc.data();
+            window.projectsMap[doc.id] = data; // Store for access
+            
             const div = document.createElement('div');
             div.className = 'project-item';
 
@@ -354,7 +386,7 @@ function loadProjects() {
                     <small style="color: var(--text-muted);">${data.date}</small>
                 </div>
                 <div style="display:flex; gap: 0.5rem;">
-                    <button class="btn btn-outline" style="padding: 0.5rem; color: var(--accent-gold); border-color: var(--accent-gold);" onclick='editProject("${doc.id}", ${JSON.stringify(data).replace(/'/g, "&#39;")})'>
+                    <button class="btn btn-outline" style="padding: 0.5rem; color: var(--accent-gold); border-color: var(--accent-gold);" onclick="editProject('${doc.id}')">
                         <i class="fas fa-edit"></i>
                     </button>
                     <button class="btn btn-outline" style="padding: 0.5rem; border-color: #ef4444; color: #ef4444;" onclick="deleteProject('${doc.id}', '${data.filename || ''}')">
@@ -368,14 +400,18 @@ function loadProjects() {
 }
 
 // Edit project handler
-window.editProject = (id, data) => {
+window.editProject = (id) => {
+    const data = window.projectsMap[id];
+    if (!data) return;
+
     editingId = id;
     document.getElementById('post-title').value = data.title;
 
     // Check if rich text or legacy
+    // Check if rich text or legacy
     if (data.htmlContent) {
-        const delta = quill.clipboard.convert(data.htmlContent);
-        quill.setContents(delta, 'silent');
+        // Quill 2.0: Use dangerouslyPasteHTML to run matchers and convert legacy HTML
+        quill.clipboard.dangerouslyPasteHTML(data.htmlContent);
     } else {
         // Legacy docx
         quill.setText(data.previewText || "Legacy content not editable.");

@@ -11,14 +11,90 @@
     <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@200;300;400;600;700&display=swap" rel="stylesheet">
     <!-- Icons -->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-    <!-- Styles -->
+    
+    <!-- MAIN SITE STYLES -->
     <link rel="stylesheet" href="style.css">
     
+    <!-- QUILL & HIGHLIGHT JS STYLES -->
+    <link href="https://cdn.jsdelivr.net/npm/quill@2.0.3/dist/quill.snow.css" rel="stylesheet">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.7.0/styles/monokai-sublime.min.css" rel="stylesheet">
+
     <!-- Firebase SDKs -->
     <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-firestore-compat.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.7.0/highlight.min.js"></script>
+    <!-- Quill Library -->
+    <script src="https://cdn.jsdelivr.net/npm/quill@2.0.3/dist/quill.js"></script>
     
     <script src="firebase-config.js"></script>
+
+    <style>
+        /* =========================================
+           BLOG CONTENT VIEWER STYLES
+           ========================================= */
+
+        #article-modal {
+            display: none; 
+            position: fixed; 
+            inset: 0; 
+            background: rgba(0,0,0,0.8); 
+            backdrop-filter: blur(5px); 
+            z-index: 1000; 
+            align-items: center; 
+            justify-content: center; 
+            padding: 2rem;
+        }
+
+        #modal-card {
+            width: 100%; 
+            max-width: 800px; 
+            height: 90vh; 
+            display: flex; 
+            flex-direction: column; 
+            padding: 0; 
+            overflow: hidden; 
+            background: #0a0a0b; 
+            border: 1px solid rgba(255,255,255,0.1);
+        }
+
+        /* Paper Mode Wrapper for Quill */
+        #quill-viewer-wrapper {
+            flex: 1;
+            background: #ffffff; /* FORCE WHITE PAPER BACKGROUND */
+            overflow: hidden;    /* Quill handles scroll */
+            display: flex;
+            flex-direction: column;
+        }
+
+        /* 
+           Customize the Read-Only Quill Toolbar to be hidden or styled 
+           (Quill adds a toolbar container by default even in readOnly, we usually hide it 
+            OR we initialize without modules if we want purely content)
+        */
+        .ql-toolbar {
+            display: none !important; /* Hide toolbar for read-only view */
+        }
+        
+        .ql-container {
+            font-family: 'Outfit', sans-serif !important;
+            font-size: 1.1rem !important;
+        }
+        
+        /* Ensure the editor area expands and scrolls */
+        .ql-editor {
+            height: 100%;
+            overflow-y: auto;
+            color: #1f2937; /* Dark text */
+            padding: 2rem !important; 
+        }
+        
+        /* Typography overrides to match site font weight preferences if needed */
+        .ql-editor h1, .ql-editor h2, .ql-editor h3 {
+            font-weight: 700 !important;
+            color: #111827 !important;
+        }
+
+    </style>
 </head>
 
 <body>
@@ -49,10 +125,10 @@
     </footer>
 
     <!-- Article Modal -->
-    <div id="article-modal" style="display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.8); backdrop-filter: blur(5px); z-index: 1000; align-items: center; justify-content: center; padding: 2rem;">
-        <div class="glass-card" style="width: 100%; max-width: 800px; height: 90vh; display: flex; flex-direction: column; padding: 0; overflow: hidden; background: #0a0a0b; border: 1px solid rgba(255,255,255,0.1);">
+    <div id="article-modal">
+        <div id="modal-card" class="glass-card">
             
-            <div style="padding: 1.5rem; border-bottom: 1px solid rgba(255,255,255,0.1); display: flex; justify-content: space-between; align-items: start; background: rgba(255,255,255,0.02);">
+            <div style="padding: 1.5rem; border-bottom: 1px solid rgba(255,255,255,0.1); display: flex; justify-content: space-between; align-items: start; background: rgba(0,0,0,0.5);">
                 <div>
                      <h2 id="modal-title" style="margin: 0; font-size: 1.8rem; color: #fff;">Title</h2>
                      <small id="modal-date" style="color: var(--accent-gold);">Date</small>
@@ -60,18 +136,31 @@
                 <button onclick="closeModal()" class="btn btn-outline" style="border: none; font-size: 1.5rem;"><i class="fas fa-times"></i></button>
             </div>
             
-            <div id="modal-content" style="padding: 2rem; overflow-y: auto; color: #d1d5db; line-height: 1.8; font-size: 1.1rem;">
-                <!-- Content goes here -->
+            <!-- CONTENT AREA: Quill Read Only -->
+            <div id="quill-viewer-wrapper">
+                <div id="viewer-container"></div>
             </div>
             
         </div>
     </div>
 
     <script>
+        let viewer; // Global quill viewer instance
+
         document.addEventListener('DOMContentLoaded', async () => {
             const grid = document.getElementById('blog-grid');
             document.getElementById('copyright-year').textContent = new Date().getFullYear();
             
+            // Initialize Quill in Read-Only Mode
+            viewer = new Quill('#viewer-container', {
+                theme: 'snow',
+                readOnly: true,
+                modules: {
+                    syntax: true, // Enable syntax highlighting
+                    toolbar: false // No toolbar for viewer
+                }
+            });
+
             try {
                 const snapshot = await db.collection('projects').orderBy('timestamp', 'desc').get();
                 
@@ -101,9 +190,6 @@
             card.style.cursor = 'pointer';
             card.style.transition = 'transform 0.3s ease, border-color 0.3s ease';
             
-            // Always open modal (even for old docx files, we just show the preview text)
-            // If it's a legacy docx without htmlContent, we might want to show a link inside the modal?
-            // For now, adhering to user request "pure blog" - we just show what we have.
             card.onclick = () => openModal(project);
 
             // Strip HTML for preview
@@ -134,11 +220,14 @@
             document.getElementById('modal-title').textContent = project.title;
             document.getElementById('modal-date').textContent = project.date;
             
-            // If it's old legacy docx, it might only have previewText. 
-            // In that case, we can show the previewText as the content, 
-            // or maybe a message saying "This is an archived file."
-            // But per request to "redesign as blog", we will try to show HTML content.
-            document.getElementById('modal-content').innerHTML = project.htmlContent || `<p>${project.previewText}</p><p><em>(Archived Content)</em></p>`;
+            let htmlContent = project.htmlContent || `<p>${project.previewText}</p><p><em>(Archived Content)</em></p>`;
+            
+            // Render content using Quill's API
+            // This bypasses our manual HTML injection and lets Quill handle the parsing and structure
+            if (viewer) {
+                // We use dangerouslyPasteHTML because our content is stored as HTML string
+                viewer.clipboard.dangerouslyPasteHTML(htmlContent);
+            }
             
             const modal = document.getElementById('article-modal');
             modal.style.display = 'flex';

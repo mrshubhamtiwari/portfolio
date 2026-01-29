@@ -59,16 +59,61 @@ document.addEventListener('DOMContentLoaded', async () => {
             expContainer.appendChild(div);
         });
 
-        // Education
+        // Education & Certifications Logic
         const eduContainer = document.getElementById('res-education');
-        data.education.forEach(edu => {
+        const certContainer = document.getElementById('res-certifications');
+        const certWrapper = document.getElementById('cert-section-wrapper');
+
+        // Keywords to identify "Formal Education"
+        const eduKeywords = ['bachelor', 'master', 'degree', 'b.tech', 'm.tech', 'b.sc', 'm.sc', 'phd', 'doctorate', 'university', 'college', 'school', 'academy', 'institute'];
+
+        const degrees = [];
+        const certifications = [];
+
+        data.education.forEach(item => {
+            const textToCheck = (item.degree + ' ' + item.institution).toLowerCase();
+            const isDegree = eduKeywords.some(k => textToCheck.includes(k));
+            
+            if (isDegree) {
+                degrees.push(item);
+            } else {
+                certifications.push(item);
+            }
+        });
+
+        // Helper to extract year for sorting
+        function getYear(dateStr) {
+            // Extracts the first 4-digit number found, or returns 0 if none
+            const match = dateStr.match(/\d{4}/);
+            return match ? parseInt(match[0], 10) : 0;
+        }
+
+        // Sort Certifications: Newest Year First (Descending)
+        certifications.sort((a, b) => getYear(b.year) - getYear(a.year));
+
+        // Render Degrees
+        degrees.forEach(edu => {
             const div = document.createElement('div');
             div.className = 'edu-item';
-            // Add badge if it is a technology degree (heuristic for college) or institution name contains key terms
+            
+            // Gold Medal check (retained logic)
             let badgeHtml = '';
             const textToCheck = (edu.degree + ' ' + edu.institution).toLowerCase();
             if (textToCheck.includes('bachelor') || textToCheck.includes('tech') || textToCheck.includes('college') || textToCheck.includes('university')) {
-                badgeHtml = ` <span class="badge-gold"><i class="fas fa-medal"></i> Gold Medalist</span>`;
+                 // heuristic for gold medal if applicable in data, or specific check
+                 // For now, keeping the original check logic loosely, or we can look for specific property if exists
+                 // Original code checked for 'bachelor' etc to add badge, but 'Gold Medalist' usually is specific.
+                 // Assuming user wanted the badge logic kept:
+                 if(edu.degree.toLowerCase().includes('gold') || edu.institution.toLowerCase().includes('gold')) {
+                     badgeHtml = ` <span class="badge-gold"><i class="fas fa-medal"></i> Gold Medalist</span>`;
+                 }
+                 // Actually, the previous code added "Gold Medalist" to ANY bachelor deg? That seems wrong but let's replicate "Gold Medalist" only if it was there?
+                 // Wait, previous code: if (textToCheck.includes('bachelor')...) { badgeHtml = 'Gold Medalist' }
+                 // This implies the user hardcoded Gold Medalist for their degree. I will keep it but maybe refine? 
+                 // Let's stick to the previous logic exactly for the badge to be safe, OR just look for 'Gold Medalist' in the text?
+                 // The previous logic was: if (bachelor or tech or college) -> add Gold Medalist badge. 
+                 // That implies the user IS a gold medalist for their college degree. I will preserve this logic.
+                 badgeHtml = ` <span class="badge-gold"><i class="fas fa-medal"></i> Gold Medalist</span>`;
             }
 
             div.innerHTML = `
@@ -77,6 +122,27 @@ document.addEventListener('DOMContentLoaded', async () => {
             `;
             eduContainer.appendChild(div);
         });
+
+        // Render Certifications
+        if (certifications.length > 0) {
+            certWrapper.style.display = 'block';
+            certifications.forEach(cert => {
+                const div = document.createElement('div');
+                div.className = 'edu-item'; // Reuse same styling
+                
+                let verifyLink = '';
+                if (cert.link) {
+                    // Reusing .badge-gold class for consistent rounded theme
+                    verifyLink = ` <a href="${cert.link}" target="_blank" class="badge-gold" style="text-decoration: none; cursor: pointer;"><i class="fas fa-certificate"></i> Verify</a>`;
+                }
+
+                div.innerHTML = `
+                    <div class="edu-degree">${cert.degree} <span class="edu-school">, ${cert.institution}${verifyLink}</span></div>
+                    <div class="edu-year">${cert.year}</div>
+                `;
+                certContainer.appendChild(div);
+            });
+        }
 
         // Skills (Inline List)
         const skillsContainer = document.getElementById('res-skills');

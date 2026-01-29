@@ -109,6 +109,9 @@ document.addEventListener('DOMContentLoaded', async () => {
             data.education.forEach(edu => {
                 const card = document.createElement('div');
                 card.className = 'glass-card exp-card reveal';
+                
+                // Debug log
+                if (edu.link) console.log("Found link for:", edu.degree, edu.link);
 
                 let badgesHtml = '';
                 if (edu.badges && edu.badges.length > 0) {
@@ -122,6 +125,11 @@ document.addEventListener('DOMContentLoaded', async () => {
 
                 // Add line break if badges exist
                 const splitHtml = badgesHtml ? '<br>' + badgesHtml : '';
+                
+                let linkHtml = '';
+                if (edu.link) {
+                    linkHtml = `<div style="margin-top: 10px;"><a href="${edu.link}" target="_blank" style="color: #b45309; font-size: 0.85rem; text-decoration: none; display: inline-flex; align-items: center; gap: 4px;"><i class="fas fa-certificate"></i> Verify Credential</a></div>`;
+                }
 
                 card.innerHTML = `
                     <h3>${edu.degree}</h3>
@@ -129,6 +137,7 @@ document.addEventListener('DOMContentLoaded', async () => {
                     <div class="exp-date" style="margin-top: 5px;">${edu.year}</div>
                     ${splitHtml}
                     ${descHtml}
+                    ${linkHtml}
                 `;
                 eduContainer.appendChild(card);
             });

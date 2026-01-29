@@ -344,7 +344,7 @@
         }
 
         .edu-degree {
-            font-weight: 600;
+            font-weight: 500;
             color: #000;
         }
 
@@ -432,6 +432,52 @@
                 width: 20px;
             }
         }
+
+        /* 
+           CRITICAL PDF OVERRIDES 
+           These must be AT THE END to override mobile styles (via !important)
+        */
+        .pdf-mode.resume-container {
+            width: 210mm !important;
+            max-width: 210mm !important;
+            min-width: 210mm !important;
+            padding: 40px 50px !important; /* Restore desktop padding */
+            margin: 0 !important;
+            box-shadow: none !important;
+            border: none !important;
+            background: white !important; /* Ensure white background */
+            color: #1f2937 !important;    /* Ensure visible text */
+            
+            /* Reset layout */
+            display: block !important;
+            position: absolute !important;
+            top: 0 !important;
+            left: 0 !important;
+            z-index: 10000 !important;
+        }
+
+        /* Force Header Back to Row */
+        .pdf-mode .resume-header {
+            flex-direction: row !important;
+            justify-content: space-between !important;
+            align-items: flex-start !important;
+            gap: 0 !important;
+        }
+
+        /* Re-stack contact info for desktop look */
+        .pdf-mode .header-right {
+            display: block !important; /* Default block behavior */
+            width: auto !important;
+            margin-top: 0 !important;
+            text-align: right !important;
+        }
+        
+        .pdf-mode .contact-item {
+            display: flex !important;
+            justify-content: flex-end !important;
+            width: 100% !important;
+            margin-bottom: 4px !important;
+        }
     </style>
 </head>
 
@@ -494,6 +540,11 @@
         <section class="resume-section">
             <h3 class="section-title">Education</h3>
             <div id="res-education"></div>
+
+            <div id="cert-section-wrapper" style="display: none;">
+                <h3 class="section-title">Certifications</h3>
+                <div id="res-certifications"></div>
+            </div>
         </section>
 
         <!-- Skills -->
@@ -519,36 +570,73 @@
     <!-- PDF Generation -->
     <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
     <script>
-        function downloadPDF() {
-            const element = document.getElementById('resume-content');
+        async function downloadPDF() {
+            const originalElement = document.getElementById('resume-content');
             const button = document.querySelector('.toolbar-btn');
 
-            // Add PDF mode class to fix gradient text and margin issues
-            element.classList.add('pdf-mode');
+            // 1. CLONE
+            // We clone to isolate changes from the live UI
+            const clone = originalElement.cloneNode(true);
+
+            // 2. CONFIGURE CLONE
+            // Position carefully so html2canvas sees it, but it doesn't break flow
+            clone.classList.add('pdf-mode');
+            clone.style.width = '210mm'; 
+            clone.style.maxWidth = '210mm';
+            clone.style.padding = '30px 45px'; 
+            clone.style.minHeight = '0'; // Allow auto height
+            clone.style.height = 'auto'; 
+            clone.style.margin = '0';
+            clone.style.position = 'absolute';
+            clone.style.left = '0';
+            clone.style.top = '0';
+            clone.style.zIndex = '10000'; // Overlay on top
+            clone.style.background = 'white'; // Ensure background for capture
+            
+            // Append
+            document.body.appendChild(clone);
+            
+            // Scroll top for capture context
+            window.scrollTo(0, 0);
+
+            // Loading State
+            const originalText = button.innerHTML;
+            button.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Preparing...';
+            button.style.pointerEvents = 'none';
+
+            // 3. RENDER DELAY (CRITICAL)
+            // Wait for browser layout engine to paint the clone
+            await new Promise(resolve => setTimeout(resolve, 800));
+            
+            button.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Generating...';
 
             const opt = {
                 margin: 0,
                 filename: 'Resume.pdf',
                 image: { type: 'jpeg', quality: 0.98 },
-                html2canvas: { scale: 2, useCORS: true, letterRendering: true, scrollY: 0 },
+                html2canvas: { 
+                    scale: 2, 
+                    useCORS: true, 
+                    scrollY: 0,
+                    windowWidth: 1200 // Desktop simulation
+                },
                 jsPDF: { unit: 'mm', format: 'a4', orientation: 'portrait' }
             };
 
-            // Show loading state
-            const originalText = button.innerHTML;
-            button.innerHTML = '<i class="fas fa-spinner fa-spin"></i>';
-            button.style.pointerEvents = 'none';
-
-            html2pdf().set(opt).from(element).save().then(() => {
+            // 4. CAPTURE
+            html2pdf().set(opt).from(clone).save().then(() => {
+                // Cleanup
+                document.body.removeChild(clone);
                 button.innerHTML = originalText;
                 button.style.pointerEvents = 'auto';
-                element.classList.remove('pdf-mode');
             }).catch(err => {
                 console.error(err);
                 alert('Error generating PDF');
+                if(document.body.contains(clone)) {
+                    document.body.removeChild(clone);
+                }
                 button.innerHTML = originalText;
                 button.style.pointerEvents = 'auto';
-                element.classList.remove('pdf-mode');
             });
         }
     </script>

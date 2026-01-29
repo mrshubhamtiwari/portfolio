@@ -211,8 +211,7 @@
 
         /* Sections */
         .resume-section {
-            margin-bottom: 20px;
-            /* Distinct styling */
+            margin-bottom: 10px; /* Reduced from 20px to fit on one page */
         }
 
         .section-title {
@@ -223,13 +222,13 @@
             border-bottom: 2px solid #111;
             /* Strong anchor */
             padding-bottom: 4px;
-            margin-bottom: 15px;
+            margin-bottom: 10px; /* Reduced from 15px */
             color: #111;
         }
 
         /* Experience */
         .exp-item {
-            margin-bottom: 16px;
+            margin-bottom: 14px; /* Slightly reduced from 16px */
         }
 
         .exp-header {
@@ -453,7 +452,10 @@
             position: absolute !important;
             top: 0 !important;
             left: 0 !important;
-            z-index: 10000 !important;
+            z-index: 99999 !important; /* Ensure it's on top of everything */
+            overflow: visible !important;
+            height: auto !important;
+            min-height: auto !important;
         }
 
         /* Force Header Back to Row */
@@ -572,41 +574,110 @@
     <script>
         async function downloadPDF() {
             const originalElement = document.getElementById('resume-content');
+            const toolbar = document.querySelector('.resume-toolbar');
             const button = document.querySelector('.toolbar-btn');
-
-            // 1. CLONE
-            // We clone to isolate changes from the live UI
-            const clone = originalElement.cloneNode(true);
-
-            // 2. CONFIGURE CLONE
-            // Position carefully so html2canvas sees it, but it doesn't break flow
-            clone.classList.add('pdf-mode');
-            clone.style.width = '210mm'; 
-            clone.style.maxWidth = '210mm';
-            clone.style.padding = '30px 45px'; 
-            clone.style.minHeight = '0'; // Allow auto height
-            clone.style.height = 'auto'; 
-            clone.style.margin = '0';
-            clone.style.position = 'absolute';
-            clone.style.left = '0';
-            clone.style.top = '0';
-            clone.style.zIndex = '10000'; // Overlay on top
-            clone.style.background = 'white'; // Ensure background for capture
-            
-            // Append
-            document.body.appendChild(clone);
-            
-            // Scroll top for capture context
-            window.scrollTo(0, 0);
 
             // Loading State
             const originalText = button.innerHTML;
             button.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Preparing...';
             button.style.pointerEvents = 'none';
 
-            // 3. RENDER DELAY (CRITICAL)
-            // Wait for browser layout engine to paint the clone
-            await new Promise(resolve => setTimeout(resolve, 800));
+            // 1. CLONE
+            const clone = originalElement.cloneNode(true);
+            
+            // 2. EXCLUSIVE VIEW STRATEGY (The Swap)
+            // Hide everything else so the browser focuses ONLY on the clone
+            const originalDisplay = originalElement.style.display;
+            const toolbarDisplay = toolbar.style.display;
+            
+            // SAVE BODY STYLES
+            const originalBodyPadding = document.body.style.padding;
+            const originalBodyDisplay = document.body.style.display;
+            const originalBodyAlign = document.body.style.alignItems;
+            const originalBodyBackground = document.body.style.background;
+
+            // STRIP BODY STYLES for Clean Capture
+            document.body.style.padding = '0';
+            document.body.style.display = 'block'; // Remove flex
+            document.body.style.alignItems = 'unset';
+            document.body.style.background = '#ffffff'; // Force white background on body too
+            
+            originalElement.style.display = 'none';
+            toolbar.style.display = 'none';
+
+            // Configure Clone for Desktop A4
+            // REMOVED .pdf-mode class to prevent CSS conflicts
+            clone.id = 'resume-clone-capture'; 
+            
+            // Apply ALL Critical Styles in JS to override everything else
+            Object.assign(clone.style, {
+                width: '210mm',
+                maxWidth: '210mm',
+                minWidth: '210mm', // Enforce strict width
+                minHeight: '0',    // DISABLE forced height to prevent 2nd page blankness
+                height: 'auto',    // Hug content
+                padding: '20px 40px', // Reduced vertical padding further to prevent 2nd page
+                margin: '0',       // LEFT ALIGN
+                backgroundColor: '#ffffff',
+                color: '#000000',
+                position: 'relative', 
+                display: 'block',
+                boxShadow: 'none',
+                border: 'none',
+                overflow: 'visible',
+                zIndex: 'auto',
+                left: 'auto',
+                top: 'auto'
+            });
+
+            // Adjust Header Layout Manually
+            const header = clone.querySelector('.resume-header');
+            if (header) {
+                Object.assign(header.style, {
+                    flexDirection: 'row',
+                    alignItems: 'flex-start',
+                    justifyContent: 'space-between',
+                    gap: '0'
+                });
+            }
+            
+            const headerRight = clone.querySelector('.header-right');
+            if (headerRight) {
+                Object.assign(headerRight.style, {
+                    display: 'block',
+                    width: 'auto',
+                    textAlign: 'right',
+                    marginTop: '0'
+                });
+                // Fix children
+                Array.from(headerRight.children).forEach(child => {
+                     Object.assign(child.style, {
+                         display: 'flex',
+                         justifyContent: 'flex-end',
+                         width: '100%',
+                         marginBottom: '4px'
+                     });
+                });
+            }
+
+            // FIX: Remove Gradient Text Background for PDF (causes weird box)
+            const designation = clone.querySelector('.header-content h2');
+            if (designation) {
+                Object.assign(designation.style, {
+                    background: 'none',
+                    webkitBackgroundClip: 'initial',
+                    webkitTextFillColor: 'initial',
+                    color: '#0891b2' // Accent blue solid color
+                });
+            }
+
+            document.body.appendChild(clone);
+            
+            // Scroll to top to ensure render start
+            window.scrollTo(0, 0);
+
+            // 3. WAIT (Critical)
+            await new Promise(resolve => setTimeout(resolve, 1000));
             
             button.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Generating...';
 
@@ -618,26 +689,45 @@
                     scale: 2, 
                     useCORS: true, 
                     scrollY: 0,
-                    windowWidth: 1200 // Desktop simulation
+                    x: 0, 
+                    y: 0,
+                    windowWidth: 800, // Match A4 width (approx 794px) to avoid right margin
+                    // Removed height override
                 },
                 jsPDF: { unit: 'mm', format: 'a4', orientation: 'portrait' }
             };
 
             // 4. CAPTURE
             html2pdf().set(opt).from(clone).save().then(() => {
-                // Cleanup
-                document.body.removeChild(clone);
-                button.innerHTML = originalText;
-                button.style.pointerEvents = 'auto';
+                cleanup();
             }).catch(err => {
                 console.error(err);
                 alert('Error generating PDF');
+                cleanup();
+            });
+
+            function cleanup() {
+                // Remove clone
                 if(document.body.contains(clone)) {
                     document.body.removeChild(clone);
                 }
+                
+                // Restore Original
+                originalElement.style.display = originalDisplay;
+                toolbar.style.display = toolbarDisplay;
+                
+                // Restore Body Styles
+                document.body.style.padding = originalBodyPadding;
+                document.body.style.display = originalBodyDisplay;
+                document.body.style.alignItems = originalBodyAlign;
+                document.body.style.background = originalBodyBackground;
+                
                 button.innerHTML = originalText;
                 button.style.pointerEvents = 'auto';
-            });
+                
+                // Reset Scroll
+                window.scrollTo(0, 0);
+            }
         }
     </script>
 </body>
